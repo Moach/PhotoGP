@@ -47,15 +47,18 @@ settlement path now.
 
 ## Ties are part of the game
 
-Two photographs can finish level. When they do the round is void and both entrants
-**replay the same stop** — same stakes, fresh opponents, never rematched against
-each other. A tie never costs you your position on the ladder.
+Two photographs can finish level. When they do the round is void and each tied
+entrant chooses: **replay the same stop** — same stakes, fresh opponents, never
+rematched against each other — or **cash out on the spot** instead. A tie never
+costs you your position on the ladder either way.
 
 - **Two-way tie (9.26% of rounds).** The two dropped entrants' stakes are split
   between the two who tied. Half that pool is exactly one stake at every tier, so
-  it funds both re-entries precisely. The house takes no share of a void.
+  it funds both re-entries precisely — or, if a tied entrant cashes out instead,
+  pays that same amount out as their prize. The house takes no share of a void.
 - **Four-way tie (1.85%).** There are no dropped entrants to fund anything, so the
-  house returns all four stakes and takes nothing. It absorbs the cost.
+  house returns all four stakes and takes nothing. It absorbs the cost. A tied
+  entrant can bank that returned stake instead of playing again.
 - **Three-way ties cannot happen.** Not a rule — an arithmetic fact of ranking
   three photographs. Verified across all 1,296 possible ballot profiles.
 

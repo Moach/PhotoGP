@@ -44,6 +44,16 @@ pay the operator double has a reason to distrust every close result. Taking zero
 on voids costs about 2.8 percentage points of realized rake and removes the
 suspicion entirely. Cheap at the price.
 
+## Cashing out on a tie doesn't move the rake
+
+A tied entrant can take the funded (two-way) or returned (four-way) amount as a
+payout instead of replaying. That amount is always exactly `stake(t)` — the same
+figure the "Replay volume" and house-revenue tables already account for as a
+void, since a void takes $0 rake regardless of what the tied entrant does with
+their share afterward. Replaying and cashing out draw on the identical pool; the
+choice only affects whether that entrant's next round happens, not what the
+house collects on this one. No figure in this document changes because of it.
+
 ## Cost of the four-way carve-out
 
 Four-way ties are 1.85% of rounds and the house absorbs all four stakes' worth of
