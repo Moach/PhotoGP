@@ -55,7 +55,7 @@ Re-deriving them is wasted work; the scripts are committed so results can be rep
   the same sum for any choice of f. Tested against 1/⅐/1/13, 1/(1/101)/(1/10007), 1/½/(1/1000)
   and irregular sets: all produced exactly 24. **1.85% is a hard floor.**
 - **The unit-fraction scheme does not reduce ties.** Every weighting tested gives exactly 11.11%
-  total ties. Borda (3/2/1) is worse at 27.78%. The fractions are chosen for interpretability,
+  total ties. Borda (3/2/1) is worse at 25.93%. The fractions are chosen for interpretability,
   not tie avoidance.
 - **Placement-count tiebreaks are useless.** Tied entrants always share an identical multiset of
   placements, so "most first-place votes" can never separate them.
@@ -72,7 +72,7 @@ Do not reintroduce these without new evidence.
   strategy-proof — weight comes only from others' votes, so it cannot be self-dealt. But the
   strength constant must be tuned per group size: k=0.15 is safe at 4 players and overturns 2.8%
   of legitimate winners at 5. Removed when ties became a designed feature rather than a defect.
-- **Five-player groups.** Drop ties to 5.29%, and crucially none are symmetric, so weighting then
+- **Five-player groups.** Drop ties to 5.25%, and crucially none are symmetric, so weighting then
   reaches 0.02%. Reverted because ties are now desirable game content, and 5-player groups need
   25% more liquidity to fill.
 - **Cardinal 0–100 ratings** instead of ranking. Reaches 0.96% ties alone. Rejected as slower and
