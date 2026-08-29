@@ -45,8 +45,10 @@ see `docs/analysis.md` for the near-miss that motivated it.
 
 ## Ties
 
-Ties are a designed outcome. In every branch the player's ladder position is
-preserved: they replay the same tier and never drop a stop.
+Ties are a designed outcome. In every branch a tied entrant chooses: replay the
+same tier — ladder position preserved, never dropping a stop — or cash out on
+the spot instead, taking the funded or returned amount as a final payout. See
+"Cashing out on a tie" below.
 
 ### Two-way tie — 9.26% of rounds
 
@@ -76,6 +78,24 @@ totals are 15 + 5 + 3 = 23. This is why no scoring scheme can separate them.
 
 Impossible. Zero occurrences across all 1,296 ballot profiles. The tie rules need
 only two branches.
+
+### Cashing out on a tie
+
+A void gives each tied entrant two options, not one:
+
+- **Replay** — same stake, same photograph, fresh opponents, tier held.
+- **Cash out** — take the money as a payout and end the run there.
+
+The cash-out amount is exactly one stake at the tied tier in both branches: the
+two-way split and the four-way refund both resolve to `stake(t)` (invariant 5),
+which is precisely what a re-entry would have cost. Cashing out simply pays that
+same amount out instead of re-staking it — no top-up, no shortfall, no change to
+house revenue on the void (still $0 either way).
+
+Framing: `stake(t) == netAmount(t-1)` for every tier above f/1, so the payout is
+presented as the entrant's win from the tier they last actually decided. At f/1
+there is no prior tier, so cashing out just returns the $1 entry fee rather than
+banking a win.
 
 ### Repeated voids
 

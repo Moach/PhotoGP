@@ -82,8 +82,8 @@ Do not reintroduce these without new evidence.
 
 ## Tie handling
 
-A tie is a designed outcome, not a failure. In both branches the player's ladder position is
-preserved — they replay the same tier, never dropping a stop.
+A tie is a designed outcome, not a failure. In both branches a tied entrant chooses: replay the
+same tier (never dropping a stop), or cash out on the spot instead.
 
 - **Two-way (9.26%)** — round void. The two dropped entrants' stakes are split between the two who
   tied, funding each re-entry exactly (invariant 5). House takes no share. The tied entrants are
@@ -92,6 +92,13 @@ preserved — they replay the same tier, never dropping a stop.
   returns all four stakes and takes no rake. Costs ~$0.0185 per contest, a 1.85% revenue dent.
 - **No cap on consecutive voids.** Expected volume is 1.125 rounds per contest; three consecutive
   ties is 1 in 729. A cap would fire almost never and confuse more people than it helps.
+- **Cash out instead of replaying.** Either tied entrant may take the funded/returned amount as a
+  final payout rather than re-entering. That amount is always exactly one stake at the tied tier —
+  the same money invariant 5 already earmarks for a re-entry, paid out instead of staked. This
+  changes no invariant and no rake figure: replaying and cashing out draw on the identical pool,
+  so house revenue on a void is $0 either way. The payout is framed as the entrant's prior-tier
+  win (`netAmount(t-1)`), since the tied round itself never decided a winner; at f/1 there is no
+  prior win, so cashing out just returns the entry fee.
 
 ## Layout
 

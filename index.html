@@ -393,7 +393,7 @@ function homeView(){
     <div class="section-head">
       <span class="eyebrow">Ties</span>
       <h2>A tie doesn't cost you your climb</h2>
-      <p style="margin-top:10px">Two photographs can finish level. When they do, the round is void and both entrants play the stop again — same stakes, fresh opponents, and never against each other twice.</p>
+      <p style="margin-top:10px">Two photographs can finish level. When they do, the round is void and each entrant who tied gets a choice — replay the stop, or cash out on the spot — never against each other twice if they replay.</p>
     </div>
     <div class="notice">
       <strong style="color:var(--paper)">Two-way tie.</strong> The two dropped entrants' stakes are split between
@@ -401,13 +401,15 @@ function homeView(){
       re-entry precisely — no top-up, no shortfall. The house takes no share of a void.
       <br><br>
       <strong style="color:var(--paper)">Four-way tie.</strong> Rare, and there are no dropped entrants to fund
-      anything, so the house voids the round outright. All four stakes are returned and all four play the stop
-      again. The house absorbs it.
+      anything, so the house voids the round outright. All four stakes are returned. The house absorbs it.
       <br><br>
       <strong style="color:var(--paper)">Three-way ties cannot happen.</strong> Not a rule — an arithmetic fact of
       ranking three photographs. Every tie is a pair or the whole group.
       <br><br>
-      Your accumulated prize never falls a stop because of a tie. You simply play the level again.
+      <strong style="color:var(--paper)">Replay or cash out.</strong> Whichever branch you land in, the money
+      funding your position is exactly one stake at that stop. Replay and it re-enters as your stake; cash out
+      and it's paid to you instead, ending the run there. Your accumulated prize never falls a stop because of a
+      tie — you either play the level again or walk away with what you'd already won.
     </div>
   </div>
 
@@ -597,13 +599,12 @@ function resultsView(){
     bottom = youTied ? `
       <div class="void-banner">
         <span class="eyebrow">Round void — two-way tie at ${scored[0].score} points</span>
-        <h3>You finished level. The stop is replayed.</h3>
+        <h3>You finished level. Replay, or cash out now.</h3>
         <p style="margin-top:8px">Both totals came to exactly ${scored[0].score} — equal as whole numbers, so there is
         nothing to round apart. The two dropped entrants' stakes are split between you and the other tied
-        entrant, ${fmt(each)} each, which is exactly one ${FSTOPS[t-1]} stake. Your position on the ladder is
-        unchanged${other?`, and you won't face ${other.handle} again`:''}.</p>
-        <button class="btn btn-primary" style="margin-top:16px" onclick="replay()">Play ${FSTOPS[t-1]} again — stake carried</button>
-      </div>` : `
+        entrant, ${fmt(each)} each, which is exactly one ${FSTOPS[t-1]} stake${other?`, and you won't face ${other.handle} again if you replay`:''}.</p>
+      </div>
+      ${tieDecisionPanel(t, each)}` : `
       <div class="card" style="margin-top:26px;text-align:center">
         <h3>Round void — but you were dropped</h3>
         <p style="margin-top:8px">Two entrants finished level above you on ${scored[0].score} points. Your ${fmt(s)} funds their replay of this stop.</p>
@@ -626,9 +627,10 @@ function resultsView(){
       <p style="margin-top:8px">Every entrant collected one 1st, one 2nd and one 3rd, so every total is
       ${RANK_POINTS[0]} + ${RANK_POINTS[1]} + ${RANK_POINTS[2]} = ${scored[0].score}. No scoring scheme can separate
       them — the sum is the same whatever the three values are. There are no dropped entrants to fund a replay,
-      so the house returns all four stakes and takes no share. Your ${fmt(s)} is back and the stop is yours to play again.</p>
-      <button class="btn btn-primary" style="margin-top:16px" onclick="replay()">Play ${FSTOPS[t-1]} again — stake returned</button>
-    </div>`;
+      so the house returns all four stakes and takes no share. Your ${fmt(s)} is back — play the stop again, or
+      keep it and stop here.</p>
+    </div>
+    ${tieDecisionPanel(t, s)}`;
   }
 
   const label = outcome==='decided' ? '' :
@@ -642,6 +644,37 @@ function resultsView(){
     ${checksum}
     <div style="margin-top:20px">${potCard}</div>
     ${bottom}</div>`;
+}
+
+/* Tied entrant's choice: replay the stop, or take the funded/returned
+   stake as a final payout instead. `amount` is always exactly one stake
+   at this tier (invariant 5) — the two-way pool split and the four-way
+   refund both resolve to stake(t), so the same panel serves both. */
+function tieDecisionPanel(t, amount){
+  const achieved = t - 1;                      // tier whose win this stake came from; 0 at f/1
+  const cashLabel = achieved>=1
+    ? `Keep your ${FSTOPS[achieved-1]} win`
+    : `Take your entry back`;
+  const cashNote = achieved>=1
+    ? `This ${fmt(amount)} is what you won at ${FSTOPS[achieved-1]}. Cashing out now banks it and ends this run
+       without risking it on a replay.`
+    : `You haven't won anything yet — this just returns your ${fmt(amount)} entry fee. Cashing out ends the run
+       with nothing risked further.`;
+  return `<div class="decision-panel">
+    <div class="decision-card">
+      <span class="eyebrow">Cash out</span><h3>${cashLabel}</h3>
+      <div class="amt">${fmt(amount)}</div>
+      <p>${cashNote}</p>
+      <button class="btn btn-gold btn-block" style="margin-top:16px" onclick="cashOutTie()">Cash out ${fmt(amount)}</button>
+    </div>
+    <div class="decision-card">
+      <span class="eyebrow">Replay</span><h3>Play ${FSTOPS[t-1]} again</h3>
+      <div class="amt">${fmt(amount)}</div>
+      <p>Same photograph, same stake, fresh opponents. Your ladder position holds — this stop replays, it never
+      drops you a stop.</p>
+      <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="replay()">Replay — stake carried</button>
+    </div>
+  </div>`;
 }
 
 function replay(){
@@ -661,6 +694,18 @@ function cashOut(){
   if(state.tier>=4) state.hallAdds.unshift({photo:state.player.photo,tier:state.tier,handle:state.player.handle});
   resetRun(); setView('profile');
 }
+/* Tied entrant cashes out instead of replaying. The payout is exactly one
+   stake at the tied tier (invariant 5) — the same amount that would have
+   funded a re-entry, paid out instead. `achievedTier` (t-1) is the stop
+   this money was actually won at, since the current tier's round never
+   decided a winner. */
+function cashOutTie(){
+  const t = state.tier, amount = stake(t), achievedTier = t - 1;
+  state.history.unshift({tier:achievedTier, tierOfTie:t, amount, tieCashout:true,
+    photo:state.player.photo, at:new Date()});
+  if(achievedTier>=4) state.hallAdds.unshift({photo:state.player.photo,tier:achievedTier,handle:state.player.handle});
+  resetRun(); setView('profile');
+}
 function advance(){
   state.tier++; state.voidStreak=0; state.excludeIds=[];
   state.group=[state.player,...makeOpponents(GROUP_SIZE-1,[])];
@@ -674,13 +719,21 @@ function profileView(){
   const voids=state.history.filter(h=>h.void);
   const total=wins.reduce((s,h)=>s+h.amount,0);
   const best=wins.reduce((m,h)=>Math.max(m,h.tier),0);
-  const rows=state.history.map(h=>`
-    <div class="history-row"><img src="${h.photo}" alt=""/>
+  const rows=state.history.map(h=>{
+    const label = h.void
+      ? `Round void at ${FSTOPS[h.tier-1]} — ${h.void==='void4'?'four-way':'two-way'} tie`
+      : h.tieCashout
+        ? (h.tier>=1
+            ? `Cashed out after a tie at ${FSTOPS[h.tierOfTie-1]} — kept your ${FSTOPS[h.tier-1]} win`
+            : `Withdrew entry after a tie at ${FSTOPS[h.tierOfTie-1]}`)
+        : `Cashed out at ${FSTOPS[h.tier-1]}`;
+    return `<div class="history-row"><img src="${h.photo}" alt=""/>
       <div class="history-meta">
-        <div>${h.void?`Round void at ${FSTOPS[h.tier-1]} — ${h.void==='void4'?'four-way':'two-way'} tie`:`Cashed out at ${FSTOPS[h.tier-1]}`}</div>
+        <div>${label}</div>
         <div class="t2">${h.at.toLocaleDateString()} · ${h.at.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}${h.void?' · stake carried, tier held':''}</div>
       </div>
-      <div class="history-amt ${h.void?'void':''}">${h.void?'replayed':fmt(h.amount)}</div></div>`).join('');
+      <div class="history-amt ${h.void?'void':''}">${h.void?'replayed':fmt(h.amount)}</div></div>`;
+  }).join('');
   return `<div class="shell section" style="border-top:none;padding-top:44px">
     <span class="eyebrow">Your record</span><h2>My Snapstakes</h2>
     <div class="stat-row">
