@@ -52,19 +52,23 @@ the spot instead, taking the funded or returned amount as a final payout. See
 
 ### Two-way tie — 9.26% of rounds
 
-Round is void. The two dropped entrants' stakes are split between the two who
-tied, which funds each re-entry exactly:
+Round is void. The house takes both dropped entrants' stakes in full; the two
+tied entrants' own stakes are untouched by the void, which funds each
+re-entry exactly:
 
-| Tier | Stake | Dropped pool | Each tied player receives | Re-entry costs |
-|------|-------|--------------|---------------------------|----------------|
+| Tier | Stake | Dropped pool → house | Each tied player keeps | Re-entry costs |
+|------|-------|-----------------------|--------------------------|----------------|
 | f/1 | $1 | $2 | $1 | $1 |
 | f/1.4 | $3 | $6 | $3 | $3 |
 | f/2 | $9 | $18 | $9 | $9 |
 | f/2.8 | $27 | $54 | $27 | $27 |
 
-Half the dropped pool equals one stake at every tier, so the mechanism is
-self-funding with no top-up and no shortfall. The house takes no share of a void.
-The two tied entrants are barred from being rematched against each other.
+A tied entrant's stake was never at risk on a void, so it's self-funding with
+no top-up and no shortfall — but the house takes `2×stake(t)` on this round,
+double what it takes on a decided round at the same tier. That's a deliberate
+tradeoff for keeping settlement in whole stakes; see `docs/economics.md` for
+the reasoning and the revenue math. The two tied entrants are barred from
+being rematched against each other.
 
 ### Four-way tie — 1.85% of rounds
 
@@ -86,11 +90,13 @@ A void gives each tied entrant two options, not one:
 - **Replay** — same stake, same photograph, fresh opponents, tier held.
 - **Cash out** — take the money as a payout and end the run there.
 
-The cash-out amount is exactly one stake at the tied tier in both branches: the
-two-way split and the four-way refund both resolve to `stake(t)` (invariant 5),
-which is precisely what a re-entry would have cost. Cashing out simply pays that
-same amount out instead of re-staking it — no top-up, no shortfall, no change to
-house revenue on the void (still $0 either way).
+The cash-out amount is exactly one stake at the tied tier in both branches: on a
+two-way tie it's the entrant's own stake, untouched by the void; on a four-way
+tie it's the stake returned outright. Both resolve to `stake(t)` (invariant 5),
+precisely what a re-entry would have cost. Cashing out simply pays that same
+amount out instead of re-staking it — no top-up, no shortfall, and no change to
+what the house collects on the void either way ($2×stake(t) on a two-way tie,
+$0 on a four-way tie, regardless of which choice the tied entrant makes).
 
 Framing: `stake(t) == netAmount(t-1)` for every tier above f/1, so the payout is
 presented as the entrant's win from the tier they last actually decided. At f/1

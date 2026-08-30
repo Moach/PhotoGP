@@ -396,9 +396,9 @@ function homeView(){
       <p style="margin-top:10px">Two photographs can finish level. When they do, the round is void and each entrant who tied gets a choice — replay the stop, or cash out on the spot — never against each other twice if they replay.</p>
     </div>
     <div class="notice">
-      <strong style="color:var(--paper)">Two-way tie.</strong> The two dropped entrants' stakes are split between
-      the two who tied. Half of that pool is exactly one stake, at every stop on the ladder, so it funds each
-      re-entry precisely — no top-up, no shortfall. The house takes no share of a void.
+      <strong style="color:var(--paper)">Two-way tie.</strong> The house takes both dropped entrants' stakes in
+      full. Each tied entrant's own stake is untouched by the void, so it covers a re-entry precisely — no
+      top-up, no shortfall. The house takes double what it takes on a decided round at the same stop.
       <br><br>
       <strong style="color:var(--paper)">Four-way tie.</strong> Rare, and there are no dropped entrants to fund
       anything, so the house voids the round outright. All four stakes are returned. The house absorbs it.
@@ -587,27 +587,26 @@ function resultsView(){
       </div>`;
 
   } else if(outcome==='void2'){
-    const pool=2*s, each=pool/2;
+    const houseTake=2*s;
     const other=scored.find(x=>tiedIds.includes(x.id)&&x.id!=='you');
     potCard=`<div class="card">
       <div class="pot-row"><span>Gross pot · ${GROUP_SIZE} × ${fmt(s)}</span><span>${fmt(grossPot(t))}</span></div>
-      <div class="pot-row"><span>House share on a void</span><span>${fmt(0)}</span></div>
-      <div class="pot-row sub"><span>Dropped entrants' stakes (2 × ${fmt(s)})</span><span>${fmt(pool)}</span></div>
-      <div class="pot-row sub"><span>Split between the two who tied</span><span>${fmt(each)} each</span></div>
-      <div class="pot-row"><span>Covers one re-entry at ${FSTOPS[t-1]}</span><span>${fmt(each)} / ${fmt(s)}</span></div>
+      <div class="pot-row"><span>House share on 2-way tie</span><span class="neg">&minus;${fmt(houseTake)}</span></div>
+      <div class="pot-row"><span>Your own stake stays yours</span><span>${fmt(s)} each</span></div>
     </div>`;
     bottom = youTied ? `
       <div class="void-banner">
         <span class="eyebrow">Round void — two-way tie at ${scored[0].score} points</span>
         <h3>You finished level. Replay, or cash out now.</h3>
         <p style="margin-top:8px">Both totals came to exactly ${scored[0].score} — equal as whole numbers, so there is
-        nothing to round apart. The two dropped entrants' stakes are split between you and the other tied
-        entrant, ${fmt(each)} each, which is exactly one ${FSTOPS[t-1]} stake${other?`, and you won't face ${other.handle} again if you replay`:''}.</p>
+        nothing to round apart. The two dropped entrants' stakes (${fmt(houseTake)}) go to the house; your own
+        ${fmt(s)} stake is untouched by the void${other?`, and you won't face ${other.handle} again if you replay`:''} —
+        cash it out now or carry it straight into a replay of ${FSTOPS[t-1]}.</p>
       </div>
-      ${tieDecisionPanel(t, each)}` : `
+      ${tieDecisionPanel(t, s)}` : `
       <div class="card" style="margin-top:26px;text-align:center">
         <h3>Round void — but you were dropped</h3>
-        <p style="margin-top:8px">Two entrants finished level above you on ${scored[0].score} points. Your ${fmt(s)} funds their replay of this stop.</p>
+        <p style="margin-top:8px">Two entrants finished level above you on ${scored[0].score} points. Your ${fmt(s)} entry goes to the house.</p>
         <div class="hero-cta" style="justify-content:center;margin-top:18px">
           <button class="btn btn-primary" onclick="restart()">Enter again from f/1 — $1</button>
           <button class="btn btn-ghost" onclick="setView('home')">Back home</button>
@@ -646,10 +645,12 @@ function resultsView(){
     ${bottom}</div>`;
 }
 
-/* Tied entrant's choice: replay the stop, or take the funded/returned
-   stake as a final payout instead. `amount` is always exactly one stake
-   at this tier (invariant 5) — the two-way pool split and the four-way
-   refund both resolve to stake(t), so the same panel serves both. */
+/* Tied entrant's choice: replay the stop, or take the stake as a final
+   payout instead. `amount` is always exactly one stake at this tier
+   (invariant 5) — on a two-way void it's the entrant's own stake, left
+   untouched since the dropped pool now goes to the house; on a four-way
+   void it's the stake returned outright. Same value either way, so the
+   same panel serves both. */
 function tieDecisionPanel(t, amount){
   const achieved = t - 1;                      // tier whose win this stake came from; 0 at f/1
   const cashLabel = achieved>=1
@@ -695,10 +696,11 @@ function cashOut(){
   resetRun(); setView('profile');
 }
 /* Tied entrant cashes out instead of replaying. The payout is exactly one
-   stake at the tied tier (invariant 5) — the same amount that would have
-   funded a re-entry, paid out instead. `achievedTier` (t-1) is the stop
-   this money was actually won at, since the current tier's round never
-   decided a winner. */
+   stake at the tied tier (invariant 5) — on a two-way void this is the
+   entrant's own stake, untouched by the tie (the house takes the dropped
+   pool instead); on a four-way void it's the stake returned outright.
+   `achievedTier` (t-1) is the stop this money was actually won at, since
+   the current tier's round never decided a winner. */
 function cashOutTie(){
   const t = state.tier, amount = stake(t), achievedTier = t - 1;
   state.history.unshift({tier:achievedTier, tierOfTie:t, amount, tieCashout:true,
