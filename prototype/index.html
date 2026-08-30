@@ -267,7 +267,13 @@ function tallyRound(group, playerRanks, force){
   const ids = group.map(m=>m.id);
   const ballots = {};
 
-  if(force === '2way'){
+  if(force === 'win'){
+    const o = ids;                                   // o[0] is 'you' — clean, undisputed win at 45
+    ballots[o[0]] = [o[1],o[2],o[3]];
+    ballots[o[1]] = [o[0],o[2],o[3]];
+    ballots[o[2]] = [o[0],o[3],o[1]];
+    ballots[o[3]] = [o[0],o[1],o[2]];
+  } else if(force === '2way'){
     const o = ids;                                   // ties o[0] and o[1] at 35
     ballots[o[0]] = [o[1],o[2],o[3]];
     ballots[o[1]] = [o[0],o[2],o[3]];
@@ -446,13 +452,6 @@ function entryView(){
           ${retrying?`Play ${FSTOPS[t-1]} again`:`Pay ${fmt(stake(t))} and enter`}</button>
       </div>
     </div>
-
-    <div class="devbar">
-      <span style="color:var(--paper-dim)">demo controls — ties are 9.26% + 1.85% of rounds, so force one to see the flow:</span>
-      <button class="btn btn-ghost btn-sm" onclick="setForce(null)">${state.forceTie===null?'▸ ':''}normal</button>
-      <button class="btn btn-ghost btn-sm" onclick="setForce('2way')">${state.forceTie==='2way'?'▸ ':''}force 2-way tie</button>
-      <button class="btn btn-ghost btn-sm" onclick="setForce('4way')">${state.forceTie==='4way'?'▸ ':''}force 4-way tie</button>
-    </div>
   </div>`;
 }
 function setForce(v){ state.forceTie=v; render(); }
@@ -499,17 +498,28 @@ function judgingView(){
   }).join('');
   const done=Object.keys(state.judging.ranks).length===GROUP_SIZE-1;
   const spent=Object.values(state.judging.ranks).reduce((a,r)=>a+RANK_POINTS[r-1],0);
+  const forced=!!state.forceTie;
+  const forceLabel={win:'forcing a win',['2way']:'forcing a 2-way tie',['4way']:'forcing a 4-way tie'}[state.forceTie];
   return `<div class="shell section" style="border-top:none;padding-top:44px">
-    <span class="eyebrow">Tier ${state.tier} · ${FSTOPS[state.tier-1]}</span>
+    <span class="eyebrow">Tier ${state.tier} · ${FSTOPS[state.tier-1]}${forced?` · ${forceLabel}`:''}</span>
     <h2>Rank these three frames</h2>
     <p style="font-family:var(--mono);font-size:12px;color:var(--fog);margin-top:10px">
       tap in order of preference · tap again to undo · 1st = ${RANK_POINTS[0]}pts · 2nd = ${RANK_POINTS[1]} · 3rd = ${RANK_POINTS[2]}</p>
     <div class="judge-grid">${photos}</div>
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-      <button class="btn btn-primary" ${done?'':'disabled'} onclick="submitRanking()">Submit ranking</button>
+      <button class="btn btn-primary" ${(done||forced)?'':'disabled'} onclick="submitRanking()">Submit ranking</button>
       <span style="font-family:var(--mono);font-size:12px;color:${spent===23?'var(--gold)':'var(--fog)'}">
         ballot spends ${spent} / 23 points</span>
-    </div></div>`;
+    </div>
+
+    <div class="devbar">
+      <span style="color:var(--paper-dim)">demo controls — force this round's outcome (overrides your taps above):</span>
+      <button class="btn btn-ghost btn-sm" onclick="setForce(null)">${state.forceTie===null?'▸ ':''}normal</button>
+      <button class="btn btn-ghost btn-sm" onclick="setForce('win')">${state.forceTie==='win'?'▸ ':''}force win</button>
+      <button class="btn btn-ghost btn-sm" onclick="setForce('2way')">${state.forceTie==='2way'?'▸ ':''}force 2-way tie</button>
+      <button class="btn btn-ghost btn-sm" onclick="setForce('4way')">${state.forceTie==='4way'?'▸ ':''}force 4-way tie</button>
+    </div>
+    </div>`;
 }
 function tapRank(id){
   if(state.judging.ranks[id]) delete state.judging.ranks[id];
