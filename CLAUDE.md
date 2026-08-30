@@ -20,7 +20,7 @@ in `prototype/index.html` is vanilla HTML/CSS/JS with no build step. Open it in 
 | Parameter | Value | Notes |
 |---|---|---|
 | Group size | 4 | Was briefly 5; reverted deliberately (see below) |
-| House rake | 25% | On decided rounds only; voids take nothing |
+| House rake | 25% decided · 2×stake(t) on 2-way void · $0 on 4-way void | See "Tie handling" |
 | Scoring | 15 / 5 / 3 | Integer form of 1, ⅓, ⅕ (LCM 15) |
 | Tier ladder | 7 stops, f/1 → f/8 | Winner nets 3ⁿ: $3, $9, $27, $81, $243, $729, $2,187 |
 | Vote weighting | **off** | Explored and removed; see "Rejected approaches" |
@@ -37,9 +37,9 @@ These must hold. If a change breaks one, the change is wrong.
 3. **Settlement uses integers only.** No floating point anywhere in scoring, tie detection, or
    payout. Tie comparison is exact `===`, never an epsilon.
 4. **gross − house = net** at every tier. `4·3ⁿ⁻¹ − 3ⁿ⁻¹ = 3ⁿ`.
-5. **Half the dropped pool equals exactly one stake**, at every tier. Two dropped entrants
-   contribute 2·3ⁿ⁻¹; split two ways gives 3ⁿ⁻¹, which is precisely the re-entry stake. This is
-   what makes two-way tie replays self-funding with no top-up and no shortfall.
+5. **A two-way tie never requires a top-up.** The dropped pool (2·3ⁿ⁻¹) goes entirely to the
+   house; a tied entrant's own stake (3ⁿ⁻¹) is untouched by the void, so it exactly covers a
+   replay or a cash-out with no shortfall — the money was never at risk in the first place.
 6. **Ties are never resolved randomly.** No coin flips, ever.
 
 ## Proven facts — settled, do not re-litigate
@@ -85,9 +85,15 @@ Do not reintroduce these without new evidence.
 A tie is a designed outcome, not a failure. In both branches a tied entrant chooses: replay the
 same tier (never dropping a stop), or cash out on the spot instead.
 
-- **Two-way (9.26%)** — round void. The two dropped entrants' stakes are split between the two who
-  tied, funding each re-entry exactly (invariant 5). House takes no share. The tied entrants are
-  barred from being matched against each other again.
+- **Two-way (9.26%)** — round void. The house takes both dropped entrants' stakes (2×stake(t)) as
+  its cut; the two tied entrants' own stakes are untouched, exactly covering a re-entry or a
+  cash-out (invariant 5). This makes the house *more* profitable on a 2-way tie than on a decided
+  round at the same tier (double: 2×stake(t) vs. stake(t)) — a deliberate tradeoff. A 25%-of-pool
+  cut was rejected because it leaves 1.5 stakes behind, which can't cover a full re-entry without
+  fractional credit tallying; taking the whole dropped pool keeps settlement in whole stakes, and
+  ties are infrequent enough (9.26%) that the doubled take is an acceptable price for that
+  simplicity. See `docs/economics.md` for the revenue math. The tied entrants are barred from
+  being matched against each other again.
 - **Four-way (1.85%)** — round void. No dropped entrants exist to fund anything, so the house
   returns all four stakes and takes no rake. Costs ~$0.0185 per contest, a 1.85% revenue dent.
 - **No cap on consecutive voids.** Expected volume is 1.125 rounds per contest; three consecutive

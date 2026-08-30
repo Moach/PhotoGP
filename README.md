@@ -52,10 +52,12 @@ entrant chooses: **replay the same stop** — same stakes, fresh opponents, neve
 rematched against each other — or **cash out on the spot** instead. A tie never
 costs you your position on the ladder either way.
 
-- **Two-way tie (9.26% of rounds).** The two dropped entrants' stakes are split
-  between the two who tied. Half that pool is exactly one stake at every tier, so
-  it funds both re-entries precisely — or, if a tied entrant cashes out instead,
-  pays that same amount out as their prize. The house takes no share of a void.
+- **Two-way tie (9.26% of rounds).** The house takes both dropped entrants'
+  stakes in full. Each tied entrant's own stake is untouched by the void, so it
+  covers a re-entry precisely — or, if a tied entrant cashes out instead, pays
+  that same amount out as their prize. This makes the house take double what it
+  takes on a decided round at the same tier — a deliberate tradeoff so every
+  settlement stays a whole stake (see `docs/economics.md`).
 - **Four-way tie (1.85%).** There are no dropped entrants to fund anything, so the
   house returns all four stakes and takes nothing. It absorbs the cost. A tied
   entrant can bank that returned stake instead of playing again.
