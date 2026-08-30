@@ -135,8 +135,10 @@ No pip installs needed.
 - Mocked throughout: payments, opponents, and payouts. Nothing touches real money.
 - State is in-memory. A refresh resets the run. This is intentional for a demo.
 - `picsum.photos` supplies placeholder imagery, so it needs network to render photos.
-- Demo controls on the entry page force a two-way or four-way tie, since ties are only 11% of
-  rounds and would otherwise be tedious to observe.
+- Demo controls on the judging screen, next to "Submit ranking", force a win, a two-way tie, or a
+  four-way tie — since ties are only 11% of rounds and a clean win isn't guaranteed either, both
+  would otherwise be tedious to reach by tapping real rankings. A forced outcome overrides
+  whatever the player tapped and also unlocks "Submit ranking" before all three photos are ranked.
 - Browser storage APIs are deliberately not used.
 
 ## Working style for this project
